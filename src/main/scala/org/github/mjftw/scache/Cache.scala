@@ -18,12 +18,15 @@ object Cache {
     Ref.of[F, Map[A, (B, Option[Fiber[F, Unit]])]](Map.empty[A, (B, Option[Fiber[F, Unit]])]).map {
       ref =>
         new Cache[F, A, B] {
+
+          /** Put a value in the cache */
           def put(key: A, value: B) =
             for {
               _ <- cancelRemoval(key)
               _ <- ref.update(_ + (key -> Tuple2(value, None)))
             } yield ()
 
+          /** Put a value in the cache and expire it after some time */
           def putWithExpiry(key: A, value: B, expireAfter: FiniteDuration) =
             for {
               _ <- cancelRemoval(key)
@@ -31,6 +34,7 @@ object Cache {
               _ <- ref.update(_ + (key -> Tuple2(value, Some(removalTimer))))
             } yield ()
 
+          /** Retrieve a value from the cache */
           def get(key: A): F[Option[B]] = ref.get.map(_.get(key).map { case (value, _) => value })
 
           /** Schedule removal removal of a key */
