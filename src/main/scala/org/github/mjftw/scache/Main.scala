@@ -9,12 +9,14 @@ object Main extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
       cache <- Cache.make[IO, String, Int]
-      _ <- cache.put("foo", 1)
+      _ <- cache.putWithExpiry("foo", 1, 1.second)
+      _ <- cache.put("bar", 1)
       _ <- IO.sleep(1.second)
-      _ <- cache.put("bar", 3)
+      _ <- cache.putWithExpiry("baz", 3, 2.seconds)
       _ <- IO.sleep(1500.millis)
-      x <- cache.get("foo")
-      y <- cache.get("bar")
-      _ <- IO(println(x, y))
+      foo <- cache.get("foo")
+      bar <- cache.get("bar")
+      baz <- cache.get("baz")
+      _ <- IO(println(s"foo: $foo. bar: $bar, baz: $baz"))
     } yield ExitCode.Success
 }
