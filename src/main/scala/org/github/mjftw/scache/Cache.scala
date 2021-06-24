@@ -17,6 +17,7 @@ trait Cache[F[_], A, B] {
 }
 
 object Cache {
+  /** Create a simple cache */
   def make[F[_]: Sync, A, B]: F[Cache[F, A, B]] =
     Ref.of[F, Map[A, B]](Map.empty[A, B]).map { ref =>
       new Cache[F, A, B] {
@@ -25,6 +26,7 @@ object Cache {
       }
     }
 
+  /** Create a cache whose entries are invalidated after an amount of time */
   def makeExpiring[F[_]: Concurrent: Timer, A, B](keyExpiry: FiniteDuration): F[Cache[F, A, B]] =
     Ref.of[F, Map[A, (B, Fiber[F, Unit])]](Map.empty[A, (B, Fiber[F, Unit])]).map { ref =>
       new Cache[F, A, B] {
