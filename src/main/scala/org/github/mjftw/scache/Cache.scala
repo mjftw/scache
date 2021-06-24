@@ -47,12 +47,6 @@ object Cache {
         def get(key: A): F[Option[B]] = ref.get.map(_.get(key).map{case (value, _) => value})
 
         private def remove(key: A): F[Unit] = ref.update(_ - key)
-
-        private def delay[A](duration: FiniteDuration)(block: => A): F[A] =
-          for {
-            _ <- Timer[F].sleep(duration)
-            a <- Sync[F].delay(block)
-          } yield a
       }
     }
 }
