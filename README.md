@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 object Example extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
-      // Make a new cache
+      // Make a new cache wrapped in an IO, with Strings for keys, and Ints for values
       cache <- Cache.make[IO, String, Int]
 
       // Put the 1 value in the cache with key "foo"
