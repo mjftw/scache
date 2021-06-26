@@ -1,5 +1,7 @@
 # Scache
 
+[![Scala CI](https://github.com/mjftw/scache/actions/workflows/scala.yml/badge.svg)](https://github.com/mjftw/scache/actions/workflows/scala.yml)
+
 A lightweight effect based Scala cache, compatible with the [Typelevel ecosystem](https://typelevel.org/cats/typelevelEcosystem.html)
 
 ## Example
