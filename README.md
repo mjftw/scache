@@ -14,7 +14,7 @@ import scala.concurrent.duration._
 object Example extends IOApp {
   def run(args: List[String]): IO[ExitCode] =
     for {
-      // Make a new cache wrapped in an IO, with Strings for keys, and Ints for values
+      // Make a new cache
       cache <- Cache.make[IO, String, Int]
 
       // Put the 1 value in the cache with key "foo"
@@ -55,3 +55,6 @@ foo: Some(1) bar: None, foo2: Some(3)
 
 The value for `foo` was retrieved, `bar` had expired so no value was
 returned, and `baz` was retrieved as it had not yet expired.
+
+In the example above `IO` was used as the effect, with Strings for keys, and Ints for values.
+You can use whatever effect, key, and value types you like though.
