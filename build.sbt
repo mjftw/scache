@@ -5,7 +5,7 @@ lazy val root = (project in file("."))
   .settings(
     organization := "io.github.mjftw",
     name := "scache",
-    version := "0.0.1-SNAPSHOT",
+    version := "0.1.0",
     scalaVersion := "2.13.4",
     libraryDependencies ++= Seq(
       "org.typelevel" %% "cats-effect" % CatsEffectVersion,
