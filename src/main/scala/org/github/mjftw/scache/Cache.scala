@@ -1,13 +1,9 @@
 package org.github.mjftw.scache
 
-import org.github.mjftw.scache.debug.DebugHelper
-
 import cats.implicits._
 import scala.concurrent.duration.FiniteDuration
 import cats.effect.concurrent.Ref
 import cats.effect.{Sync, Fiber, Concurrent, Timer}
-import cats.kernel.Monoid
-import cats.Functor
 
 trait Cache[F[_], K, V] {
   def put(key: K, value: V): F[Unit]
