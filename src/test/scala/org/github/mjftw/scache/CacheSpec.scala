@@ -43,6 +43,20 @@ class CacheSpec extends AnyFlatSpec with Matchers {
     result should be(Some(2))
   }
 
+  it should "prevent key removal when overwriting a key scheduled for removal" in {
+    val result = (for {
+      cache <- Cache.make[IO, String, Int]
+      _ <- cache.putWithExpiry("foo", 1, 1.second)
+      _ <- cache.put("foo", 2)
+      _ <- IO.sleep(2.seconds)
+      x <- cache.get("foo")
+    } yield x).unsafeToFuture()
+
+    ctx.tick(3.seconds)
+
+    result.value should be(Some(Success(Some(2))))
+  }
+
   "putWithExpiry and get" should "store and retrieve values" in {
     val result = (for {
       cache <- Cache.make[IO, String, Int]

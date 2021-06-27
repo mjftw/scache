@@ -1,55 +1,62 @@
 package org.github.mjftw.scache
 
+import org.github.mjftw.scache.debug.DebugHelper
+
 import cats.implicits._
 import scala.concurrent.duration.FiniteDuration
 import cats.effect.concurrent.Ref
 import cats.effect.{Sync, Fiber, Concurrent, Timer}
+import cats.kernel.Monoid
+import cats.Functor
 
-trait Cache[F[_], A, B] {
-  def put(key: A, value: B): F[Unit]
-  def putWithExpiry(key: A, value: B, expireAfter: FiniteDuration): F[Unit]
-  def get(key: A): F[Option[B]]
+trait Cache[F[_], K, V] {
+  def put(key: K, value: V): F[Unit]
+  def putWithExpiry(key: K, value: V, expireAfter: FiniteDuration): F[Unit]
+  def get(key: K): F[Option[V]]
 }
 
 object Cache {
 
+  type CacheFiber[F[_]] = Fiber[F, Unit]
+  type CacheValue[F[_], V] = (V, CacheFiber[F])
+  type CacheMap[F[_], K, V] = Map[K, CacheValue[F, V]]
+
   /** Create a cache whose entries are invalidated after an amount of time */
-  def make[F[_]: Concurrent: Timer, A, B]: F[Cache[F, A, B]] =
-    Ref.of[F, Map[A, (B, Option[Fiber[F, Unit]])]](Map.empty[A, (B, Option[Fiber[F, Unit]])]).map {
-      ref =>
-        new Cache[F, A, B] {
+  def make[F[_]: Concurrent: Timer, K, V]: F[Cache[F, K, V]] =
+    Ref
+      .of[F, CacheMap[F, K, V]](Map.empty[K, CacheValue[F, V]])
+      .map { ref =>
+        new Cache[F, K, V] {
 
           /** Put a value in the cache */
-          def put(key: A, value: B) =
-            for {
-              _ <- cancelRemoval(key)
-              _ <- ref.update(_ + (key -> Tuple2(value, None)))
-            } yield ()
+          def put(key: K, value: V): F[Unit] =
+            putValueAndFiber(key, value, Fiber(Sync[F].unit, Sync[F].unit))
 
           /** Put a value in the cache and expire it after some time */
-          def putWithExpiry(key: A, value: B, expireAfter: FiniteDuration) =
+          def putWithExpiry(key: K, value: V, expireAfter: FiniteDuration): F[Unit] =
             for {
-              _ <- cancelRemoval(key)
-              removalTimer <- scheduleRemoval(key, expireAfter)
-              _ <- ref.update(_ + (key -> Tuple2(value, Some(removalTimer))))
+              fiber <- scheduleRemoval(key, expireAfter)
+              _ <- putValueAndFiber(key, value, fiber)
             } yield ()
 
           /** Retrieve a value from the cache */
-          def get(key: A): F[Option[B]] = ref.get.map(_.get(key).map { case (value, _) => value })
+          def get(key: K): F[Option[V]] = ref.get.map(_.get(key).map { case (value, _) => value })
+
+          /** Put replace the value and fiber at a key and cancel the old fiber */
+          private def putValueAndFiber(key: K, value: V, fiber: CacheFiber[F]) =
+            for {
+              oldCache <- ref.getAndUpdate(cache => cache + (key -> Tuple2(value, fiber)))
+              _ <- oldCache.get(key) match {
+                case Some((_, oldFiber)) => oldFiber.cancel
+                case None                => Sync[F].unit
+              }
+            } yield ()
 
           /** Schedule removal removal of a key */
-          private def scheduleRemoval(key: A, removeAfter: FiniteDuration): F[Fiber[F, Unit]] =
+          private def scheduleRemoval(key: K, removeAfter: FiniteDuration): F[Fiber[F, Unit]] =
             Concurrent[F].start {
               Timer[F].sleep(removeAfter) *> ref.update(_ - key)
             }
-
-          /** Cancel any ongoing removal timer */
-          private def cancelRemoval(key: A): F[Unit] = ref.get
-            .map(_.get(key) match {
-              case Some((_, Some(fiber))) => fiber.cancel
-              case _                      => Sync[F].unit
-            })
-            .flatten
         }
-    }
+      }
 }
