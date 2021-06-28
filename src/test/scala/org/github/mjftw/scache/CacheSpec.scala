@@ -131,4 +131,45 @@ class CacheSpec extends AnyFlatSpec with Matchers {
     result.value should be(Some(Success((Some(1), None))))
   }
 
+  "cancelExpiry" should "remove the invalidation timer on cache entries" in {
+    val result = (for {
+      cache <- Cache.make[IO, String, Int]
+      _ <- cache.putWithExpiry("foo", 1, 1.second)
+      _ <- IO.sleep(500.millis)
+      _ <- cache.cancelExpiry("foo")
+      _ <- IO.sleep(1.second)
+      x <- cache.get("foo")
+    } yield x).unsafeToFuture
+
+    ctx.tick(2.second)
+
+    result.value should be(Some(Success(Some(1))))
+  }
+
+  it should "return true if the key was not found in the cache" in {
+    val result = (for {
+      cache <- Cache.make[IO, String, Int]
+      _ <- cache.putWithExpiry("foo", 1, 1.second)
+      _ <- IO.sleep(500.millis)
+      x <- cache.cancelExpiry("foo")
+    } yield x).unsafeToFuture
+
+    ctx.tick(2.second)
+
+    result.value should be(Some(Success(true)))
+  }
+
+  it should "return false if the key was not found in the cache" in {
+    val result = (for {
+      cache <- Cache.make[IO, String, Int]
+      _ <- cache.putWithExpiry("bar", 1, 1.second)
+      _ <- IO.sleep(500.millis)
+      x <- cache.cancelExpiry("foo")
+    } yield x).unsafeToFuture
+
+    ctx.tick(2.second)
+
+    result.value should be(Some(Success(false)))
+  }
+
 }

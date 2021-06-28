@@ -9,6 +9,7 @@ trait Cache[F[_], K, V] {
   def put(key: K, value: V): F[Unit]
   def putWithExpiry(key: K, value: V, expireAfter: FiniteDuration): F[Unit]
   def get(key: K): F[Option[V]]
+  def cancelExpiry(key: K): F[Boolean]
 }
 
 object Cache {
@@ -37,6 +38,24 @@ object Cache {
 
           /** Retrieve a value from the cache */
           def get(key: K): F[Option[V]] = ref.get.map(_.get(key).map { case (value, _) => value })
+
+          /** Prevent a cache entry at a given key from expiring.
+            * Returns true if the key was found in the cache, false otherwise.
+            */
+          def cancelExpiry(key: K): F[Boolean] =
+            for {
+              oldCache <- ref.getAndUpdate(cache =>
+                cache.get(key) match {
+                  case Some((value, _)) =>
+                    cache + (key -> Tuple2(value, Fiber(Sync[F].unit, Sync[F].unit)))
+                  case None => cache
+                }
+              )
+              wasFound <- oldCache.get(key) match {
+                case Some((_, oldFiber)) => oldFiber.cancel.as(true)
+                case None                => Sync[F].unit.as(false)
+              }
+            } yield wasFound
 
           /** Put replace the value and fiber at a key and cancel the old fiber */
           private def putValueAndFiber(key: K, value: V, fiber: CacheFiber[F]) =
