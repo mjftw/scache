@@ -17,5 +17,5 @@ jobs:
         uses: anthropics/claude-code-base-action@beta
         with:
           prompt: "Generate a documentation for the project and save it to the docs folder (create it if it doesn't exist). Once you're done, raise a pull request to this branch with the changes."
-          allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
+          allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool,Write"
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
