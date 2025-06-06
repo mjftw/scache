@@ -1,0 +1,11 @@
+ Consider these factors:
+          1. Are there new public APIs, functions, or methods?
+          2. Are there breaking changes to existing functionality?
+          3. Are there new features or significant behavioral changes?
+          4. Are there new configuration options or environment variables?
+          5. Are there changes to installation, setup, or usage procedures?
+          Respond with a JSON object containing:
+          - "needs_docs": boolean (true if documentation updates are recommended)
+          - "confidence": number (0-1, how confident you are in this assessment)
+          - "reasoning": string (brief explanation of your decision)
+          - "suggested_areas": array of strings (which documentation areas should be updated)

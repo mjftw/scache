@@ -16,6 +16,6 @@ jobs:
       - name: Run Claude Code with direct prompt
         uses: anthropics/claude-code-base-action@beta
         with:
-          prompt: "Generate a documentation for the project and save it to the docs folder (create it if it doesn't exist). Once you're done, raise a pull request to this branch with the changes."
+          prompt_file: ".github/workflows/claude-prompt.txt"
           allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool,Write"
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
