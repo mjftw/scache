@@ -1,0 +1,13 @@
+Consider these factors:
+    1. Are there new public APIs, functions, or methods?
+    2. Are there breaking changes to existing functionality?
+    3. Are there new features or significant behavioral changes?
+    4. Are there new configuration options or environment variables?
+    5. Are there changes to installation, setup, or usage procedures?
+
+    Write your review as markdown text.
+    Include:
+    - Whether documentation updates are needed (and why)
+    - Your confidence level in this assessment
+    - Specific areas of documentation that should be updated
+    - Any recommendations for the developer
