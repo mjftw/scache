@@ -4,7 +4,9 @@ Consider these factors:
     3. Are there new features or significant behavioral changes?
     4. Are there new configuration options or environment variables?
     5. Are there changes to installation, setup, or usage procedures?
-    Leave a comment on the pull request with your assessment. Include:
+
+    Write your review as markdown text in the file "claude-output.md"
+    Include:
     - Whether documentation updates are needed (and why)
     - Your confidence level in this assessment
     - Specific areas of documentation that should be updated
