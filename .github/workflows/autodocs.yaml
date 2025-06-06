@@ -1,0 +1,21 @@
+name: Scala CI
+
+on:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Node.js 20
+        uses: actions/setup-node@v3
+        with:
+          node-version: "20.x"
+
+      # Using a direct prompt
+      - name: Run Claude Code with direct prompt
+        uses: anthropics/claude-code-base-action@beta
+        with:
+          prompt: "Generate a documentation for the project and save it to the docs folder (create it if it doesn't exist). Once you're done, raise a pull request to this branch with the changes."
+          allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool"
+          anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
