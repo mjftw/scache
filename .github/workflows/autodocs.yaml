@@ -53,9 +53,13 @@ jobs:
 
             // Find the last assistant message which should contain the review
             for (let i = executionLog.length - 1; i >= 0; i--) {
-              if (executionLog[i].role === 'assistant' && executionLog[i].content) {
-                review = executionLog[i].content;
-                break;
+              if (executionLog[i].type === 'assistant' && executionLog[i].message && executionLog[i].message.content) {
+                // Claude's response structure: message.content[0].text
+                const content = executionLog[i].message.content;
+                if (Array.isArray(content) && content.length > 0 && content[0].type === 'text') {
+                  review = content[0].text;
+                  break;
+                }
               }
             }
 
