@@ -5,7 +5,7 @@ Consider these factors:
     4. Are there new configuration options or environment variables?
     5. Are there changes to installation, setup, or usage procedures?
 
-    Write your review as markdown text in the file "claude-output.md"
+    Write your review as markdown text.
     Include:
     - Whether documentation updates are needed (and why)
     - Your confidence level in this assessment
