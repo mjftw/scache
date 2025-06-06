@@ -7,6 +7,9 @@ jobs:
   autodocs:
     runs-on: ubuntu-latest
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - name: Set up Node.js 20
         uses: actions/setup-node@v3
         with:
@@ -16,6 +19,6 @@ jobs:
       - name: Run Claude Code with direct prompt
         uses: anthropics/claude-code-base-action@beta
         with:
-          prompt_file: "./claude-prompt.txt"
+          prompt_file: "./.github/workflows/claude-prompt.txt"
           allowed_tools: "Bash(git:*),View,GlobTool,GrepTool,BatchTool,Write"
           anthropic_api_key: ${{ secrets.ANTHROPIC_API_KEY }}
