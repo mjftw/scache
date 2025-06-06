@@ -1,4 +1,4 @@
-name: Scala CI
+name: AutoDocs with Claude
 
 on:
   pull_request:
